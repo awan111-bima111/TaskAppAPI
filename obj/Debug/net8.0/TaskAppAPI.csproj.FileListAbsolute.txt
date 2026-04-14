@@ -114,3 +114,4 @@ C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.pdb
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.genruntimeconfig.cache
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\ref\TaskAppAPI.dll
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.sourcelink.json
