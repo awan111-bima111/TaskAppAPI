@@ -6,6 +6,7 @@ C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\TaskAppAPI.deps.json
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\TaskAppAPI.runtimeconfig.json
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\TaskAppAPI.dll
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\TaskAppAPI.pdb
+C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\Humanizer.dll
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
@@ -98,6 +99,7 @@ C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.AssemblyInfo.cs
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.csproj.CoreCompileInputs.cache
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.MvcApplicationPartsAssemblyInfo.cs
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.MvcApplicationPartsAssemblyInfo.cache
+C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.sourcelink.json
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\rjimswa.dswa.cache.json
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
@@ -113,5 +115,3 @@ C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\refint\TaskAppAPI.dll
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.pdb
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.genruntimeconfig.cache
 C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\ref\TaskAppAPI.dll
-C:\TaskAppAPI\TaskAppAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll
-C:\TaskAppAPI\TaskAppAPI\obj\Debug\net8.0\TaskAppAPI.sourcelink.json

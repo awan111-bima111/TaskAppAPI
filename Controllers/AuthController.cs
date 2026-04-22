@@ -5,8 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using TaskAppAPI.Data;
 using TaskAppAPI.Models;
-using BCrypt.Net;
-using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace TaskAppAPI.Controllers
 {
@@ -23,152 +22,111 @@ namespace TaskAppAPI.Controllers
             _config = config;
         }
 
+        // ================= REGISTER =================
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDto request)
+        public IActionResult Register([FromBody] RegisterDto req)
         {
-            try
+            if (req == null || string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
+                return BadRequest("data kosong");
+
+            var email = req.Email.Trim().ToLower();
+            var password = req.Password.Trim();
+            var name = req.Name?.Trim() ?? "";
+
+            Console.WriteLine($"REGISTER -> {email}");
+
+            var exist = _context.Users.FirstOrDefault(x => x.Email.ToLower().Trim() == email);
+            if (exist != null)
+                return BadRequest("email sudah dipakai");
+
+            var user = new User
             {
-                if (request == null)
-                    return BadRequest(new { message = "Request kosong" });
+                Id = Guid.NewGuid(),
+                Name = name,
+                Email = email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
+            };
 
-                if (string.IsNullOrWhiteSpace(request.Name) ||
-                    string.IsNullOrWhiteSpace(request.Email) ||
-                    string.IsNullOrWhiteSpace(request.Password))
-                {
-                    return BadRequest(new { message = "Name, email, dan password wajib diisi" });
-                }
+            _context.Users.Add(user);
+            _context.SaveChanges();
 
-                if (_context.Users.Any(x => x.Email == request.Email))
-                    return BadRequest(new { message = "Email sudah terdaftar" });
-
-                var user = new User
-                {
-                    Id = Guid.NewGuid(),
-                    Name = request.Name,
-                    Email = request.Email,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-                };
-
-                _context.Users.Add(user);
-                _context.SaveChanges();
-
-                var token = GenerateToken(user);
-
-                return Ok(new
-                {
-                    message = "Register berhasil",
-                    token = token,
-                    user = new
-                    {
-                        user.Id,
-                        user.Name,
-                        user.Email
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "Terjadi error saat register",
-                    error = ex.Message
-                });
-            }
+            return Ok(new { message = "register sukses" });
         }
 
+        // ================= LOGIN =================
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto request)
+        public IActionResult Login([FromBody] LoginDto req)
         {
-            try
+            Console.WriteLine("===== LOGIN HIT =====");
+
+            if (req == null)
             {
-                if (request == null)
-                    return BadRequest(new { message = "Request kosong" });
-
-                if (string.IsNullOrWhiteSpace(request.Email) ||
-                    string.IsNullOrWhiteSpace(request.Password))
-                {
-                    return BadRequest(new { message = "Email dan password wajib diisi" });
-                }
-
-                var user = _context.Users.FirstOrDefault(x => x.Email == request.Email);
-
-                if (user == null)
-                    return Unauthorized(new { message = "Email tidak ditemukan" });
-
-                if (string.IsNullOrWhiteSpace(user.PasswordHash))
-                    return Unauthorized(new { message = "Data password tidak valid, register ulang" });
-
-                if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                    return Unauthorized(new { message = "Password salah" });
-
-                var token = GenerateToken(user);
-
-                return Ok(new
-                {
-                    message = "Login berhasil",
-                    token = token,
-                    user = new
-                    {
-                        user.Id,
-                        user.Name,
-                        user.Email
-                    }
-                });
+                Console.WriteLine("REQ NULL");
+                return BadRequest("request kosong");
             }
-            catch (Exception ex)
+
+            Console.WriteLine("EMAIL RAW: " + req.Email);
+            Console.WriteLine("PASSWORD RAW: " + req.Password);
+
+            if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
+                return BadRequest("data kosong");
+
+            var email = req.Email.Trim().ToLower();
+            var password = req.Password.Trim();
+
+            Console.WriteLine("EMAIL FIX: " + email);
+            Console.WriteLine("PASSWORD FIX: " + password);
+
+            var user = _context.Users
+                .FirstOrDefault(x => x.Email.ToLower().Trim() == email);
+
+            if (user == null)
             {
-                return StatusCode(500, new
-                {
-                    message = "Terjadi error saat login",
-                    error = ex.Message
-                });
+                Console.WriteLine("USER TIDAK DITEMUKAN");
+                return Unauthorized("email tidak ditemukan");
             }
-        }
 
-        private string GenerateToken(User user)
-        {
-            var key = _config["Jwt:Key"] ?? "TaskAppAPI_SuperSecret_Key_2026_123456";
+            Console.WriteLine("USER DITEMUKAN: " + user.Email);
+
+            var isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+
+            Console.WriteLine("PASSWORD MATCH: " + isValid);
+
+            if (!isValid)
+                return Unauthorized("password salah");
+
+            var key = _config["Jwt:Key"];
+            if (string.IsNullOrEmpty(key))
+                return StatusCode(500, "JWT key tidak ada");
+
             var keyBytes = Encoding.UTF8.GetBytes(key);
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("id", user.Id.ToString()),
                     new Claim("email", user.Email),
-                    new Claim("name", user.Name)
+                    new Claim("name", user.Name ?? "")
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(keyBytes),
                     SecurityAlgorithms.HmacSha256)
-            };
+            });
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return Ok(new
+            {
+                token = tokenHandler.WriteToken(token),
+                user = new
+                {
+                    user.Id,
+                    user.Name,
+                    user.Email
+                }
+            });
         }
-    }
-
-    public class RegisterDto
-    {
-        [Required]
-        public string Name { get; set; } = "";
-
-        [Required]
-        public string Email { get; set; } = "";
-
-        [Required]
-        public string Password { get; set; } = "";
-    }
-
-    public class LoginDto
-    {
-        [Required]
-        public string Email { get; set; } = "";
-
-        [Required]
-        public string Password { get; set; } = "";
     }
 }
